@@ -182,3 +182,445 @@
     border-right-color: var(--border);
   }
 }
+
+/* =========================================================
+   AQUAGUARD NETWORK LOCATION MAP
+   ========================================================= */
+
+.network-map-panel {
+  width: 100%;
+  margin-bottom: 24px;
+  padding: 24px;
+
+  border: 1px solid #1b405c;
+  border-radius: 16px;
+
+  background: #0b1d30;
+}
+
+.network-map-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  margin-bottom: 20px;
+}
+
+.network-map-header h2 {
+  margin: 5px 0;
+
+  color: #ffffff;
+
+  font-size: 20px;
+}
+
+.network-map-header p {
+  margin: 0;
+
+  color: #66869e;
+
+  font-size: 13px;
+}
+
+.map-live-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 7px 11px;
+
+  border-radius: 7px;
+
+  background: rgba(34, 197, 94, 0.12);
+
+  color: #35df82;
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.map-live-status span {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+
+  box-shadow:
+    0 0 8px #22c55e;
+}
+
+/* MAP */
+
+.network-map {
+  position: relative;
+
+  width: 100%;
+  height: 440px;
+
+  overflow: hidden;
+
+  border: 1px solid #183c55;
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      rgba(9, 32, 50, 0.9),
+      rgba(7, 25, 41, 0.95)
+    );
+}
+
+/* GRID */
+
+.map-grid {
+  position: absolute;
+
+  inset: 0;
+
+  opacity: 0.3;
+
+  background-image:
+    linear-gradient(
+      rgba(51, 132, 170, 0.15) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(51, 132, 170, 0.15) 1px,
+      transparent 1px
+    );
+
+  background-size: 40px 40px;
+}
+
+/* PIPELINE LINES */
+
+.pipeline-line {
+  position: absolute;
+
+  height: 5px;
+
+  transform-origin: left center;
+
+  border-radius: 10px;
+
+  background: linear-gradient(
+    90deg,
+    #0b7cae,
+    #21b9ee
+  );
+
+  box-shadow:
+    0 0 8px rgba(31, 184, 238, 0.25);
+
+  z-index: 1;
+}
+
+.line-1 {
+  width: 25%;
+
+  left: 13%;
+  top: 36%;
+
+  transform: rotate(18deg);
+}
+
+.line-2 {
+  width: 25%;
+
+  left: 31%;
+  top: 42%;
+
+  transform: rotate(-15deg);
+}
+
+.line-3 {
+  width: 25%;
+
+  left: 51%;
+  top: 36%;
+
+  transform: rotate(17deg);
+}
+
+.line-4 {
+  width: 23%;
+
+  left: 70%;
+  top: 43%;
+
+  transform: rotate(-17deg);
+}
+
+/* LOCATION */
+
+.map-location {
+  position: absolute;
+
+  z-index: 5;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  transform: translate(-50%, -50%);
+
+  min-width: 90px;
+
+  text-align: center;
+}
+
+.location-icon {
+  width: 45px;
+  height: 45px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 6px;
+
+  border-radius: 50%;
+
+  font-size: 20px;
+}
+
+.sensor-icon {
+  border: 2px solid #20c77b;
+
+  background: #0a2d2b;
+
+  color: #2ee989;
+
+  box-shadow:
+    0 0 15px rgba(34, 197, 94, 0.2);
+}
+
+.location-icon.leak-icon {
+  border: 2px solid #ff4141;
+
+  background: #451b1b;
+
+  box-shadow:
+    0 0 20px rgba(255, 65, 65, 0.7);
+
+  animation: leakPulse 1.3s infinite;
+}
+
+.location-icon.tank {
+  border: 2px solid #28aee0;
+
+  background: #0d3048;
+}
+
+.location-icon.house {
+  border: 2px solid #28aee0;
+
+  background: #0d3048;
+}
+
+.map-location strong {
+  color: #e5f1f9;
+
+  font-size: 12px;
+}
+
+.map-location small {
+  margin-top: 3px;
+
+  color: #62839b;
+
+  font-size: 9px;
+}
+
+/* LEAK NODE */
+
+.leak-location-map strong {
+  color: #ff5757;
+}
+
+/* LEAK PULSE */
+
+@keyframes leakPulse {
+
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(255, 65, 65, 0.65);
+  }
+
+  70% {
+    box-shadow:
+      0 0 0 18px rgba(255, 65, 65, 0);
+  }
+
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(255, 65, 65, 0);
+  }
+
+}
+
+/* ALERT */
+
+.map-alert {
+  position: absolute;
+
+  top: 18px;
+  right: 18px;
+
+  z-index: 20;
+
+  min-width: 280px;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 12px 15px;
+
+  border: 1px solid #823333;
+  border-radius: 10px;
+
+  background:
+    rgba(76, 21, 21, 0.94);
+
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.map-alert-icon {
+  font-size: 22px;
+}
+
+.map-alert div:nth-child(2) {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.map-alert strong {
+  color: #ff5a5a;
+
+  font-size: 13px;
+}
+
+.map-alert span {
+  color: #d49595;
+
+  font-size: 10px;
+}
+
+.map-alert-probability {
+  margin-left: auto;
+
+  color: #ff4d4d;
+
+  font-size: 18px;
+  font-weight: 800;
+}
+
+/* LEGEND */
+
+.map-legend {
+  position: absolute;
+
+  left: 18px;
+  bottom: 18px;
+
+  z-index: 20;
+
+  display: flex;
+  gap: 18px;
+
+  padding: 10px 13px;
+
+  border: 1px solid #1b405c;
+  border-radius: 8px;
+
+  background: rgba(6, 20, 33, 0.9);
+
+  color: #7898ad;
+
+  font-size: 10px;
+}
+
+.map-legend > div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+
+  border-radius: 50%;
+}
+
+.legend-dot.green {
+  background: #22c55e;
+}
+
+.legend-dot.red {
+  background: #ff4141;
+
+  box-shadow:
+    0 0 7px #ff4141;
+}
+
+.legend-line {
+  width: 20px;
+  height: 3px;
+
+  border-radius: 5px;
+
+  background: #20b8ed;
+}
+
+
+/* =========================================================
+   MAP RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  .network-map {
+    height: 360px;
+  }
+
+  .network-map-header {
+    flex-direction: column;
+
+    gap: 12px;
+  }
+
+  .map-alert {
+    top: 12px;
+    right: 12px;
+
+    min-width: 220px;
+  }
+
+  .map-legend {
+    left: 10px;
+    bottom: 10px;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+  }
+
+  .map-location {
+    min-width: 65px;
+  }
+
+  .location-icon {
+    width: 38px;
+    height: 38px;
+
+    font-size: 16px;
+  }
+
+}
