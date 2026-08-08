@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { FaWater, FaSignOutAlt } from "react-icons/fa";
 import SensorCharts from "../components/SensorCharts";
 
-export default function Dashboard() {
+export default function Dashboard({ onNavigate }) {
   const [leakDetected, setLeakDetected] = useState(false);
   const [ticketCreated, setTicketCreated] = useState(false);
   const [valveClosed, setValveClosed] = useState(false);
@@ -30,422 +29,766 @@ export default function Dashboard() {
   return (
     <div className="dashboard">
 
-      {/* SIDEBAR */}
-      <aside className="sidebar">
-        <div className="brand">
-          <FaWater />
-          <span>AquaGuard AI</span>
+      {/* HEADER */}
+      <header className="dashboard-header">
+
+        <div>
+          <h1>Water Network Dashboard</h1>
+
+          <p>
+            Real-time monitoring & AI leak detection
+          </p>
         </div>
 
-        <nav>
-          <button>🏠 Dashboard</button>
-          <button>📊 Analytics</button>
-          <button>📄 Reports</button>
-          <button>⚙️ Settings</button>
-        </nav>
 
-        <button className="logout">
-          <FaSignOutAlt />
-          Logout
+        <div className="admin">
+
+          <span className="online-dot"></span>
+
+          <div>
+            <strong>Admin</strong>
+            <small>Administrator</small>
+          </div>
+
+        </div>
+
+      </header>
+
+
+      {/* DASHBOARD NAVIGATION */}
+      <div className="dashboard-nav">
+
+        <button
+          type="button"
+          className="active-nav"
+          onClick={() => onNavigate("dashboard")}
+        >
+          🏠 Dashboard
         </button>
-      </aside>
 
-      {/* MAIN */}
-      <main className="main-content">
 
-        {/* HEADER */}
-        <header className="dashboard-header">
-          <div>
-            <h1>Water Network Dashboard</h1>
-            <p>Real-time monitoring & AI leak detection</p>
-          </div>
+        <button
+          type="button"
+          onClick={() => onNavigate("analytics")}
+        >
+          📊 Analytics
+        </button>
 
-          <div className="admin">
-            <span className="online-dot"></span>
-            Admin
-          </div>
-        </header>
 
-        {/* SIMULATION */}
-        <div className="simulation-bar">
-          <div>
-            <strong>Simulation Control</strong>
-            <p>Test the complete AquaGuard AI response workflow</p>
-          </div>
+        <button
+          type="button"
+          onClick={() => onNavigate("reports")}
+        >
+          📄 Reports
+        </button>
 
-          <button
-            className="simulate-btn"
-            onClick={leakDetected ? resetSystem : simulateLeak}
-          >
-            {leakDetected ? "Reset System" : "🚨 Simulate Leak"}
-          </button>
+      </div>
+
+
+      {/* SIMULATION */}
+      <div className="simulation-bar">
+
+        <div>
+
+          <strong>
+            Simulation Control
+          </strong>
+
+          <p>
+            Test the complete AquaGuard AI response workflow
+          </p>
+
         </div>
 
-        {/* STATUS CARDS */}
-        <section className="stats-grid">
 
-          <div className="stat-card">
-            <span>💧 Flow Rate</span>
-            <h2>{leakDetected ? "82 L/min" : "120 L/min"}</h2>
-            <small className={leakDetected ? "danger-text" : ""}>
-              {leakDetected ? "Abnormal" : "Normal"}
-            </small>
-          </div>
+        <button
+          type="button"
+          className="simulate-btn"
+          onClick={
+            leakDetected
+              ? resetSystem
+              : simulateLeak
+          }
+        >
+          {leakDetected
+            ? "↻ Reset System"
+            : "🚨 Simulate Leak"}
+        </button>
 
-          <div className="stat-card">
-            <span>🔵 Pressure</span>
-            <h2>{leakDetected ? "2.1 Bar" : "4.3 Bar"}</h2>
-            <small className={leakDetected ? "danger-text" : ""}>
-              {leakDetected ? "Pressure Drop" : "Stable"}
-            </small>
-          </div>
+      </div>
 
-          <div className="stat-card">
-            <span>🤖 Leak Probability</span>
-            <h2>{leakDetected ? "96%" : "4%"}</h2>
-            <small className={leakDetected ? "danger-text" : ""}>
-              {leakDetected ? "⚠ High Risk" : "Low Risk"}
-            </small>
-          </div>
 
-          <div className="stat-card">
-            <span>🔧 Valve Status</span>
-            <h2>{valveClosed ? "CLOSED" : "OPEN"}</h2>
-            <small className={valveClosed ? "" : "danger-text"}>
-              {valveClosed ? "Section Isolated" : "Water Flow Active"}
-            </small>
-          </div>
+      {/* STATUS CARDS */}
+      <section className="stats-grid">
 
-        </section>
+        <div className="stat-card">
 
-        {/* PIPELINE + AI */}
-        <section className="dashboard-grid">
+          <span>💧 Flow Rate</span>
 
-          {/* PIPELINE */}
-          <div className="panel pipeline-panel">
-            <h2>Smart Pipeline Network</h2>
+          <h2>
+            {leakDetected
+              ? "82 L/min"
+              : "120 L/min"}
+          </h2>
 
-            <div className="pipeline">
+          <small
+            className={
+              leakDetected
+                ? "danger-text"
+                : ""
+            }
+          >
+            {leakDetected
+              ? "⚠ Abnormal"
+              : "✓ Normal"}
+          </small>
 
-              <div className="node">
-                🏭
-                <span>Tank</span>
-              </div>
+        </div>
 
-              <div className="pipe"></div>
 
-              <div className="node">
-                ⚙️
-                <span>Pump</span>
-              </div>
+        <div className="stat-card">
 
-              <div className="pipe"></div>
+          <span>🔵 Pressure</span>
 
-              <div className="node healthy">
-                S1
-              </div>
+          <h2>
+            {leakDetected
+              ? "2.1 Bar"
+              : "4.3 Bar"}
+          </h2>
 
-              <div className="pipe"></div>
+          <small
+            className={
+              leakDetected
+                ? "danger-text"
+                : ""
+            }
+          >
+            {leakDetected
+              ? "⚠ Pressure Drop"
+              : "✓ Stable"}
+          </small>
 
-              <div className="node healthy">
-                S2
-              </div>
+        </div>
 
-              <div
-                className={
-                  leakDetected && !valveClosed
-                    ? "pipe leak-pipe"
-                    : "pipe"
-                }
-              ></div>
 
-              <div
-                className={
-                  leakDetected && !valveClosed
-                    ? "node leak"
-                    : "node healthy"
-                }
-              >
-                S3
-              </div>
+        <div className="stat-card">
 
-              <div
-                className={
-                  leakDetected && !valveClosed
-                    ? "pipe leak-pipe"
-                    : "pipe"
-                }
-              ></div>
+          <span>🤖 Leak Probability</span>
 
-              <div className="node">
-                🏠
-                <span>House</span>
-              </div>
+          <h2>
+            {leakDetected
+              ? "96%"
+              : "4%"}
+          </h2>
+
+          <small
+            className={
+              leakDetected
+                ? "danger-text"
+                : ""
+            }
+          >
+            {leakDetected
+              ? "⚠ High Risk"
+              : "✓ Low Risk"}
+          </small>
+
+        </div>
+
+
+        <div className="stat-card">
+
+          <span>🔧 Valve Status</span>
+
+          <h2>
+            {valveClosed
+              ? "CLOSED"
+              : "OPEN"}
+          </h2>
+
+          <small
+            className={
+              valveClosed
+                ? "success-text"
+                : "danger-text"
+            }
+          >
+            {valveClosed
+              ? "✓ Section Isolated"
+              : "⚠ Water Flow Active"}
+          </small>
+
+        </div>
+
+      </section>
+
+
+      {/* PIPELINE + AI */}
+      <section className="dashboard-grid">
+
+        {/* PIPELINE */}
+        <div className="panel pipeline-panel">
+
+          <div className="panel-title">
+
+            <div>
+
+              <h2>
+                Smart Pipeline Network
+              </h2>
+
+              <p>
+                Real-time sensor network
+              </p>
 
             </div>
 
-            {leakDetected && !valveClosed && (
-              <div className="leak-location">
-                📍 Leak detected near Pipeline Node 3
-              </div>
-            )}
+            <span className="network-status">
+              🟢 LIVE
+            </span>
 
-            {valveClosed && (
-              <div className="isolation-message">
-                ✓ Node 3 isolated — water flow stopped
-              </div>
-            )}
           </div>
 
-          {/* AI ANALYSIS */}
-          <div className="panel ai-panel">
-            <h2>🤖 AI Analysis</h2>
 
-            <div className="ai-status">
-              <span>System Status</span>
+          <div className="pipeline">
 
-              <strong
-                className={
-                  leakDetected && !valveClosed ? "critical" : ""
-                }
-              >
-                {!leakDetected
-                  ? "HEALTHY"
-                  : valveClosed
-                  ? "ISOLATED"
-                  : "CRITICAL"}
-              </strong>
+            <div className="node">
+              🏭
+              <span>Tank</span>
             </div>
 
-            <div className="ai-value">
-              <span>Leak Probability</span>
-              <strong>
-                {leakDetected && !valveClosed ? "96%" : "4%"}
-              </strong>
+            <div className="pipe"></div>
+
+            <div className="node">
+              ⚙️
+              <span>Pump</span>
             </div>
 
-            <div className="ai-value">
-              <span>AI Confidence</span>
-              <strong>98%</strong>
+            <div className="pipe"></div>
+
+            <div className="node healthy">
+              S1
+              <span>Flow</span>
             </div>
 
-            <div className="ai-value">
-              <span>Detected Location</span>
-              <strong>
-                {leakDetected ? "Node 3" : "None"}
-              </strong>
-            </div>
+            <div className="pipe"></div>
 
-            <div className="ai-value">
-              <span>Recommended Action</span>
-              <strong>
-                {valveClosed
-                  ? "Repair Pipeline"
-                  : leakDetected
-                  ? "Isolate Node 3"
-                  : "Continue Monitoring"}
-              </strong>
+            <div className="node healthy">
+              S2
+              <span>Pressure</span>
             </div>
 
             <div
               className={
                 leakDetected && !valveClosed
-                  ? "recommendation danger"
-                  : "recommendation"
+                  ? "pipe leak-pipe"
+                  : "pipe"
+              }
+            ></div>
+
+            <div
+              className={
+                leakDetected && !valveClosed
+                  ? "node leak"
+                  : "node healthy"
+              }
+            >
+              S3
+
+              <span>
+                {leakDetected
+                  ? "LEAK"
+                  : "Acoustic"}
+              </span>
+
+            </div>
+
+            <div
+              className={
+                leakDetected && !valveClosed
+                  ? "pipe leak-pipe"
+                  : "pipe"
+              }
+            ></div>
+
+            <div className="node">
+              🏠
+              <span>House</span>
+            </div>
+
+          </div>
+
+
+          {leakDetected && !valveClosed && (
+
+            <div className="leak-location">
+
+              🚨
+
+              <strong>
+                Leak Detected
+              </strong>
+
+              <span>
+                Location: Pipeline Node 3
+              </span>
+
+            </div>
+
+          )}
+
+
+          {valveClosed && (
+
+            <div className="isolation-message">
+              ✓ Node 3 isolated — water flow stopped
+            </div>
+
+          )}
+
+        </div>
+
+
+        {/* AI ANALYSIS */}
+        <div className="panel ai-panel">
+
+          <div className="panel-title">
+
+            <div>
+
+              <h2>
+                🤖 AI Analysis
+              </h2>
+
+              <p>
+                Machine learning detection engine
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div className="ai-status">
+
+            <span>
+              System Status
+            </span>
+
+            <strong
+              className={
+                leakDetected && !valveClosed
+                  ? "critical"
+                  : "healthy-text"
               }
             >
               {!leakDetected
-                ? "✓ No abnormal activity detected"
+                ? "HEALTHY"
                 : valveClosed
-                ? "✓ Pipeline section safely isolated"
-                : "⚠ Immediate isolation recommended"}
-            </div>
+                ? "ISOLATED"
+                : "CRITICAL"}
+            </strong>
+
           </div>
 
-        </section>
 
-        {/* ALERTS + SENSOR */}
-        <section className="dashboard-grid">
+          <div className="ai-value">
 
-          {/* ALERTS */}
-          <div className="panel">
-            <h2>📡 Live Alerts</h2>
+            <span>
+              Leak Probability
+            </span>
 
-            {!leakDetected ? (
-              <>
-                <div className="alert normal">
-                  🟢 System operating normally
-                </div>
+            <strong>
+              {leakDetected
+                ? "96%"
+                : "4%"}
+            </strong>
 
-                <div className="alert normal">
-                  🟢 All sensors connected
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="alert danger">
-                  🚨 Water Leak Detected
-                </div>
-
-                <div className="alert danger">
-                  📍 Location: Pipeline Node 3
-                </div>
-
-                {!ticketCreated ? (
-                  <button
-                    className="maintenance-btn"
-                    onClick={createMaintenanceTicket}
-                  >
-                    🛠 Create Maintenance Ticket
-                  </button>
-                ) : (
-                  <div className="ticket-success">
-                    <strong>✓ Maintenance Ticket Created</strong>
-
-                    <div className="ticket-details">
-                      <p>Ticket ID: AQ-2045</p>
-                      <p>Priority: HIGH</p>
-                      <p>Location: Pipeline Node 3</p>
-                      <p>Status: Assigned</p>
-                      <p>Team: Water Maintenance</p>
-                    </div>
-                  </div>
-                )}
-
-                {ticketCreated && !valveClosed && (
-                  <button
-                    className="valve-btn"
-                    onClick={closeValve}
-                  >
-                    🔒 Close Isolation Valve
-                  </button>
-                )}
-
-                {valveClosed && (
-                  <div className="ticket-success">
-                    ✓ Isolation Valve Closed
-                    <br />
-                    <small>Pipeline Node 3 isolated successfully.</small>
-                  </div>
-                )}
-              </>
-            )}
           </div>
 
-          {/* SENSOR STATUS */}
-          <div className="panel">
-            <h2>🎛 Sensor Status</h2>
 
-            <div className="sensor-row">
-              <span>Flow Sensor</span>
-              <strong>🟢 Online</strong>
-            </div>
+          <div className="ai-value">
 
-            <div className="sensor-row">
-              <span>Pressure Sensor</span>
-              <strong>🟢 Online</strong>
-            </div>
+            <span>
+              AI Confidence
+            </span>
 
-            <div className="sensor-row">
-              <span>ESP32</span>
-              <strong>🟢 Connected</strong>
-            </div>
+            <strong>
+              98%
+            </strong>
 
-            <div className="sensor-row">
-              <span>AI Engine</span>
-              <strong>🟢 Active</strong>
-            </div>
-
-            <div className="sensor-row">
-              <span>Isolation Valve</span>
-              <strong>
-                {valveClosed ? "🔴 Closed" : "🟢 Open"}
-              </strong>
-            </div>
           </div>
 
-        </section>
 
-        {/* MAINTENANCE RESPONSE */}
-        {ticketCreated && (
-          <section className="panel maintenance-panel">
+          <div className="ai-value">
 
-            <div className="maintenance-header">
-              <div>
-                <h2>🛠 Maintenance Response</h2>
-                <p>Incident response workflow</p>
-              </div>
+            <span>
+              Detected Location
+            </span>
 
-              <span
-                className={
-                  valveClosed
-                    ? "status-badge success-badge"
-                    : "status-badge"
-                }
-              >
-                {valveClosed
-                  ? "PIPELINE ISOLATED"
-                  : "TEAM DISPATCHED"}
+            <strong>
+              {leakDetected
+                ? "Node 3"
+                : "None"}
+            </strong>
+
+          </div>
+
+
+          <div className="ai-value">
+
+            <span>
+              Recommended Action
+            </span>
+
+            <strong>
+              {valveClosed
+                ? "Repair Pipeline"
+                : leakDetected
+                ? "Isolate Node 3"
+                : "Continue Monitoring"}
+            </strong>
+
+          </div>
+
+
+          <div
+            className={
+              leakDetected && !valveClosed
+                ? "recommendation danger"
+                : "recommendation"
+            }
+          >
+            {!leakDetected
+              ? "✓ No abnormal activity detected"
+              : valveClosed
+              ? "✓ Pipeline section safely isolated"
+              : "⚠ Immediate isolation recommended"}
+          </div>
+
+        </div>
+
+      </section>
+
+
+      {/* LIVE ALERTS + SENSOR STATUS */}
+      <section className="dashboard-grid">
+
+        <div className="panel">
+
+          <div className="panel-title">
+
+            <div>
+
+              <h2>
+                📡 Live Alerts
+              </h2>
+
+              <p>
+                Real-time system notifications
+              </p>
+
+            </div>
+
+            {leakDetected && (
+
+              <span className="alert-badge">
+                1 NEW
               </span>
-            </div>
 
-            <div className="maintenance-steps">
+            )}
 
-              <div className="maintenance-step completed">
-                <span>✓</span>
-                <div>
-                  <strong>Leak Detected</strong>
-                  <small>AI detection completed</small>
-                </div>
+          </div>
+
+
+          {!leakDetected ? (
+
+            <>
+              <div className="alert normal">
+                🟢 System operating normally
               </div>
 
-              <div className="maintenance-step completed">
-                <span>✓</span>
-                <div>
-                  <strong>Administrator Alerted</strong>
-                  <small>Emergency notification sent</small>
-                </div>
+              <div className="alert normal">
+                🟢 All sensors connected
+              </div>
+            </>
+
+          ) : (
+
+            <>
+
+              <div className="alert danger">
+                🚨 Water Leak Detected
               </div>
 
-              <div className="maintenance-step completed">
-                <span>✓</span>
-                <div>
-                  <strong>Ticket Created</strong>
-                  <small>AQ-2045 • High Priority</small>
-                </div>
+              <div className="alert danger">
+                📍 Location: Pipeline Node 3
               </div>
 
-              <div
-                className={
-                  valveClosed
-                    ? "maintenance-step completed"
-                    : "maintenance-step active"
-                }
-              >
-                <span>{valveClosed ? "✓" : "→"}</span>
-                <div>
+
+              {!ticketCreated ? (
+
+                <button
+                  type="button"
+                  className="maintenance-btn"
+                  onClick={createMaintenanceTicket}
+                >
+                  🛠 Create Maintenance Ticket
+                </button>
+
+              ) : (
+
+                <div className="ticket-success">
+
                   <strong>
-                    {valveClosed
-                      ? "Pipeline Isolated"
-                      : "Maintenance Team Dispatched"}
+                    ✓ Maintenance Ticket Created
                   </strong>
 
-                  <small>
-                    {valveClosed
-                      ? "Node 3 safely isolated"
-                      : "ETA: 12 minutes"}
-                  </small>
+                  <div className="ticket-details">
+
+                    <p>Ticket ID: AQ-2045</p>
+                    <p>Priority: HIGH</p>
+                    <p>Location: Pipeline Node 3</p>
+                    <p>Status: Assigned</p>
+                    <p>Team: Water Maintenance</p>
+
+                  </div>
+
                 </div>
+
+              )}
+
+
+              {ticketCreated && !valveClosed && (
+
+                <button
+                  type="button"
+                  className="valve-btn"
+                  onClick={closeValve}
+                >
+                  🔒 Close Isolation Valve
+                </button>
+
+              )}
+
+
+              {valveClosed && (
+
+                <div className="ticket-success">
+
+                  ✓ Isolation Valve Closed
+
+                  <br />
+
+                  <small>
+                    Pipeline Node 3 isolated successfully.
+                  </small>
+
+                </div>
+
+              )}
+
+            </>
+
+          )}
+
+        </div>
+
+
+        {/* SENSOR STATUS */}
+        <div className="panel">
+
+          <div className="panel-title">
+
+            <div>
+
+              <h2>
+                🎛 Sensor Status
+              </h2>
+
+              <p>
+                Connected IoT devices
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div className="sensor-row">
+            <span>Flow Sensor</span>
+            <strong>🟢 Online</strong>
+          </div>
+
+          <div className="sensor-row">
+            <span>Pressure Sensor</span>
+            <strong>🟢 Online</strong>
+          </div>
+
+          <div className="sensor-row">
+            <span>ESP32</span>
+            <strong>🟢 Connected</strong>
+          </div>
+
+          <div className="sensor-row">
+            <span>AI Engine</span>
+            <strong>🟢 Active</strong>
+          </div>
+
+          <div className="sensor-row">
+
+            <span>
+              Isolation Valve
+            </span>
+
+            <strong>
+              {valveClosed
+                ? "🔴 Closed"
+                : "🟢 Open"}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      {/* MAINTENANCE */}
+      {ticketCreated && (
+
+        <section className="panel maintenance-panel">
+
+          <div className="maintenance-header">
+
+            <div>
+
+              <h2>
+                🛠 Maintenance Response
+              </h2>
+
+              <p>
+                Incident response workflow
+              </p>
+
+            </div>
+
+            <span
+              className={
+                valveClosed
+                  ? "status-badge success-badge"
+                  : "status-badge"
+              }
+            >
+              {valveClosed
+                ? "PIPELINE ISOLATED"
+                : "TEAM DISPATCHED"}
+            </span>
+
+          </div>
+
+
+          <div className="maintenance-steps">
+
+            <div className="maintenance-step completed">
+
+              <span>✓</span>
+
+              <div>
+
+                <strong>
+                  Leak Detected
+                </strong>
+
+                <small>
+                  AI detection completed
+                </small>
+
               </div>
 
             </div>
-          </section>
-        )}
 
-        {/* CHARTS */}
-        <SensorCharts leakDetected={leakDetected} />
 
-      </main>
+            <div className="maintenance-step completed">
+
+              <span>✓</span>
+
+              <div>
+
+                <strong>
+                  Administrator Alerted
+                </strong>
+
+                <small>
+                  Emergency notification sent
+                </small>
+
+              </div>
+
+            </div>
+
+
+            <div className="maintenance-step completed">
+
+              <span>✓</span>
+
+              <div>
+
+                <strong>
+                  Ticket Created
+                </strong>
+
+                <small>
+                  AQ-2045 • High Priority
+                </small>
+
+              </div>
+
+            </div>
+
+
+            <div
+              className={
+                valveClosed
+                  ? "maintenance-step completed"
+                  : "maintenance-step active"
+              }
+            >
+
+              <span>
+                {valveClosed ? "✓" : "→"}
+              </span>
+
+              <div>
+
+                <strong>
+                  {valveClosed
+                    ? "Pipeline Isolated"
+                    : "Maintenance Team Dispatched"}
+                </strong>
+
+                <small>
+                  {valveClosed
+                    ? "Node 3 safely isolated"
+                    : "ETA: 12 minutes"}
+                </small>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      )}
+
+
+      {/* CHARTS */}
+      <SensorCharts
+        leakDetected={leakDetected}
+      />
+
     </div>
   );
 }
