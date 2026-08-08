@@ -1,4 +1,9 @@
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 const AquaGuardContext = createContext();
 
@@ -62,6 +67,76 @@ export function AquaGuardProvider({ children }) {
     },
   ]);
 
+  /*
+   * AUTOMATIC SENSOR SIMULATION
+   *
+   * Updates every 3 seconds when the system
+   * is operating normally.
+   */
+  useEffect(() => {
+    if (leakDetected) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setSensorData((previous) => {
+        const flowVariation =
+          Math.floor(Math.random() * 7) - 3;
+
+        const pressureVariation =
+          (Math.random() * 0.2 - 0.1).toFixed(2);
+
+        const probabilityVariation =
+          Math.floor(Math.random() * 5) - 2;
+
+        return {
+          flowRate: Math.max(
+            110,
+            Math.min(
+              130,
+              previous.flowRate + flowVariation
+            )
+          ),
+
+          pressure: Number(
+            Math.max(
+              4.0,
+              Math.min(
+                4.6,
+                previous.pressure +
+                  Number(pressureVariation)
+              )
+            ).toFixed(2)
+          ),
+
+          leakProbability: Math.max(
+            1,
+            Math.min(
+              10,
+              previous.leakProbability +
+                probabilityVariation
+            )
+          ),
+
+          aiConfidence: Math.max(
+            95,
+            Math.min(
+              99,
+              previous.aiConfidence +
+                Math.floor(Math.random() * 3) - 1
+            )
+          ),
+        };
+      });
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [leakDetected]);
+
+
+  /*
+   * SIMULATE LEAK
+   */
   const simulateLeak = () => {
     setLeakDetected(true);
 
@@ -73,7 +148,6 @@ export function AquaGuardProvider({ children }) {
     });
 
     setTicketCreated(true);
-
     setValveClosed(false);
 
     const newIncident = {
@@ -95,6 +169,10 @@ export function AquaGuardProvider({ children }) {
     ]);
   };
 
+
+  /*
+   * RESET SYSTEM
+   */
   const resetSystem = () => {
     setLeakDetected(false);
     setTicketCreated(false);
@@ -108,10 +186,18 @@ export function AquaGuardProvider({ children }) {
     });
   };
 
+
+  /*
+   * CLOSE VALVE
+   */
   const closeValve = () => {
     setValveClosed(true);
   };
 
+
+  /*
+   * RESOLVE INCIDENT
+   */
   const resolveIncident = (incidentId) => {
     setIncidents((previous) =>
       previous.map((incident) =>
@@ -126,6 +212,9 @@ export function AquaGuardProvider({ children }) {
 
     setLeakDetected(false);
 
+    setTicketCreated(false);
+    setValveClosed(false);
+
     setSensorData({
       flowRate: 120,
       pressure: 4.3,
@@ -133,6 +222,7 @@ export function AquaGuardProvider({ children }) {
       aiConfidence: 98,
     });
   };
+
 
   return (
     <AquaGuardContext.Provider
@@ -153,6 +243,7 @@ export function AquaGuardProvider({ children }) {
     </AquaGuardContext.Provider>
   );
 }
+
 
 export function useAquaGuard() {
   const context = useContext(AquaGuardContext);

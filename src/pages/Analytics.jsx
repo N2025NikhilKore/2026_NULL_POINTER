@@ -1,121 +1,219 @@
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import React, { useMemo } from "react";
+import { useAquaGuard } from "../context/AquaGuardContext";
 
-const flowData = [
-  { time: "08:00", flow: 118 },
-  { time: "09:00", flow: 121 },
-  { time: "10:00", flow: 120 },
-  { time: "11:00", flow: 119 },
-  { time: "12:00", flow: 122 },
-  { time: "13:00", flow: 82 },
-  { time: "14:00", flow: 117 },
-];
+function Analytics() {
+  const { incidents, sensorData, leakDetected } = useAquaGuard();
 
-const pressureData = [
-  { time: "08:00", pressure: 4.2 },
-  { time: "09:00", pressure: 4.3 },
-  { time: "10:00", pressure: 4.3 },
-  { time: "11:00", pressure: 4.2 },
-  { time: "12:00", pressure: 4.4 },
-  { time: "13:00", pressure: 2.1 },
-  { time: "14:00", pressure: 4.2 },
-];
+  // -----------------------------
+  // BASIC ANALYTICS
+  // -----------------------------
 
-const incidentData = [
-  { day: "Mon", leaks: 2 },
-  { day: "Tue", leaks: 1 },
-  { day: "Wed", leaks: 3 },
-  { day: "Thu", leaks: 1 },
-  { day: "Fri", leaks: 2 },
-  { day: "Sat", leaks: 0 },
-  { day: "Sun", leaks: 1 },
-];
+  const totalIncidents = incidents.length;
 
-export default function Analytics() {
+  const activeIncidents = incidents.filter(
+    (incident) => incident.status === "Active"
+  ).length;
+
+  const resolvedIncidents = incidents.filter(
+    (incident) => incident.status === "Resolved"
+  ).length;
+
+  const averageProbability =
+    incidents.length > 0
+      ? Math.round(
+          incidents.reduce(
+            (sum, incident) =>
+              sum + incident.probability,
+            0
+          ) / incidents.length
+        )
+      : 0;
+
+  const averageResponse =
+    incidents.length > 0
+      ? (
+          incidents.reduce(
+            (sum, incident) =>
+              sum + parseInt(incident.response),
+            0
+          ) / incidents.length
+        ).toFixed(1)
+      : "0.0";
+
+
+  // -----------------------------
+  // HIGH RISK INCIDENTS
+  // -----------------------------
+
+  const highRiskIncidents = incidents.filter(
+    (incident) => incident.probability >= 90
+  ).length;
+
+
+  // -----------------------------
+  // WATER SAVED ESTIMATION
+  // -----------------------------
+
+  const waterSaved = resolvedIncidents * 1250;
+
+
+  // -----------------------------
+  // RESPONSE PERFORMANCE
+  // -----------------------------
+
+  const responseScore = Math.max(
+    60,
+    Math.min(
+      99,
+      100 - Math.round(
+        Number(averageResponse) * 2
+      )
+    )
+  );
+
+
+  // -----------------------------
+  // LOCATION ANALYSIS
+  // -----------------------------
+
+  const locationStats = useMemo(() => {
+    const map = {};
+
+    incidents.forEach((incident) => {
+      if (!map[incident.location]) {
+        map[incident.location] = 0;
+      }
+
+      map[incident.location]++;
+    });
+
+    return Object.entries(map)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+  }, [incidents]);
+
+
+  // -----------------------------
+  // SYSTEM HEALTH
+  // -----------------------------
+
+  const systemHealth = leakDetected
+    ? 72
+    : 96;
+
+
   return (
     <div className="analytics-page">
+
+      {/* HEADER */}
 
       <div className="analytics-header">
 
         <div>
 
-          <h1>System Analytics</h1>
+          <span className="page-label">
+            AQUAGUARD AI / ANALYTICS
+          </span>
+
+          <h1>
+            Network Analytics
+          </h1>
 
           <p>
-            Historical performance and AI monitoring insights
+            AI-powered water network performance insights
           </p>
 
         </div>
 
+
         <div className="analytics-period">
-          Last 7 Days ▾
+          📅 Live Data
         </div>
 
       </div>
 
 
-      {/* SUMMARY */}
+      {/* STATISTICS */}
 
-      <section className="analytics-stats">
+      <div className="analytics-stats">
 
         <div className="analytics-card">
-          <span>🚨 Total Leaks Detected</span>
 
-          <h2>10</h2>
+          <span>
+            🚨 Total Incidents
+          </span>
 
-          <small className="positive">
-            ↓ 18% from last week
+          <h2>
+            {totalIncidents}
+          </h2>
+
+          <small>
+            {activeIncidents > 0
+              ? `${activeIncidents} currently active`
+              : "No active incidents"}
           </small>
+
         </div>
 
 
         <div className="analytics-card">
-          <span>💧 Water Saved</span>
 
-          <h2>1,840 L</h2>
+          <span>
+            💧 Water Saved
+          </span>
+
+          <h2>
+            {waterSaved.toLocaleString()} L
+          </h2>
 
           <small className="positive">
-            ↑ 24% efficiency
+            ✓ From leak prevention
           </small>
+
         </div>
 
 
         <div className="analytics-card">
-          <span>⏱ Avg Response Time</span>
 
-          <h2>4.8 min</h2>
+          <span>
+            ⚡ Avg Response Time
+          </span>
+
+          <h2>
+            {averageResponse} min
+          </h2>
 
           <small className="positive">
-            ↓ 32% faster
+            ✓ AI-assisted response
           </small>
+
         </div>
 
 
         <div className="analytics-card">
-          <span>🤖 AI Detection Accuracy</span>
 
-          <h2>98.4%</h2>
+          <span>
+            🤖 AI Detection Accuracy
+          </span>
+
+          <h2>
+            98%
+          </h2>
 
           <small className="positive">
-            ↑ 2.1% improvement
+            ✓ High confidence
           </small>
+
         </div>
 
-      </section>
+      </div>
 
 
-      {/* FLOW + PRESSURE */}
+      {/* MAIN ANALYTICS GRID */}
 
-      <section className="analytics-grid">
+      <div className="analytics-grid">
+
+        {/* SENSOR PERFORMANCE */}
 
         <div className="analytics-panel">
 
@@ -123,351 +221,621 @@ export default function Analytics() {
 
             <div>
 
-              <h2>💧 Flow Rate History</h2>
+              <h2>
+                📡 Live Sensor Performance
+              </h2>
 
               <p>
-                Litres per minute
+                Current readings from connected sensors
               </p>
 
             </div>
 
-            <span className="metric-green">
-              120 L/min
-            </span>
+            <strong className="metric-green">
+              {leakDetected
+                ? "ABNORMAL"
+                : "NORMAL"}
+            </strong>
 
           </div>
 
 
-          <ResponsiveContainer
-            width="100%"
-            height={280}
-          >
-
-            <LineChart data={flowData}>
-
-              <CartesianGrid
-                stroke="#183650"
-                strokeDasharray="3 3"
-              />
-
-              <XAxis
-                dataKey="time"
-                stroke="#71869a"
-              />
-
-              <YAxis
-                stroke="#71869a"
-              />
-
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#0b1728",
-                  border: "1px solid #21435d",
-                  borderRadius: "8px",
-                  color: "#fff",
-                }}
-              />
-
-              <Line
-                type="monotone"
-                dataKey="flow"
-                stroke="#22c55e"
-                strokeWidth={3}
-              />
-
-            </LineChart>
-
-          </ResponsiveContainer>
-
-        </div>
-
-
-        <div className="analytics-panel">
-
-          <div className="analytics-panel-header">
-
-            <div>
-
-              <h2>🔵 Pressure History</h2>
-
-              <p>
-                Pipeline pressure
-              </p>
-
-            </div>
-
-            <span className="metric-blue">
-              4.3 Bar
-            </span>
-
-          </div>
-
-
-          <ResponsiveContainer
-            width="100%"
-            height={280}
-          >
-
-            <LineChart data={pressureData}>
-
-              <CartesianGrid
-                stroke="#183650"
-                strokeDasharray="3 3"
-              />
-
-              <XAxis
-                dataKey="time"
-                stroke="#71869a"
-              />
-
-              <YAxis
-                stroke="#71869a"
-                domain={[0, 5]}
-              />
-
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#0b1728",
-                  border: "1px solid #21435d",
-                  borderRadius: "8px",
-                  color: "#fff",
-                }}
-              />
-
-              <Line
-                type="monotone"
-                dataKey="pressure"
-                stroke="#38bdf8"
-                strokeWidth={3}
-              />
-
-            </LineChart>
-
-          </ResponsiveContainer>
-
-        </div>
-
-      </section>
-
-
-      {/* INCIDENTS + HEALTH */}
-
-      <section className="analytics-grid">
-
-        <div className="analytics-panel">
-
-          <div className="analytics-panel-header">
-
-            <div>
-
-              <h2>🚨 Leak Incidents</h2>
-
-              <p>
-                Detected incidents per day
-              </p>
-
-            </div>
-
-          </div>
-
-
-          <ResponsiveContainer
-            width="100%"
-            height={280}
-          >
-
-            <BarChart data={incidentData}>
-
-              <CartesianGrid
-                stroke="#183650"
-                strokeDasharray="3 3"
-              />
-
-              <XAxis
-                dataKey="day"
-                stroke="#71869a"
-              />
-
-              <YAxis
-                stroke="#71869a"
-              />
-
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#0b1728",
-                  border: "1px solid #21435d",
-                  borderRadius: "8px",
-                  color: "#fff",
-                }}
-              />
-
-              <Bar
-                dataKey="leaks"
-                fill="#ef4444"
-                radius={[5, 5, 0, 0]}
-              />
-
-            </BarChart>
-
-          </ResponsiveContainer>
-
-        </div>
-
-
-        <div className="analytics-panel">
-
-          <h2>🟢 System Health</h2>
-
+          {/* FLOW */}
 
           <div className="health-item">
 
             <div>
-              <span>Flow Sensors</span>
-              <strong>100%</strong>
+
+              <span>
+                Flow Rate
+              </span>
+
+              <strong>
+                {sensorData.flowRate} L/min
+              </strong>
+
             </div>
 
             <div className="progress">
-              <div
-                className="progress-fill green"
-                style={{ width: "100%" }}
-              ></div>
-            </div>
 
-          </div>
-
-
-          <div className="health-item">
-
-            <div>
-              <span>Pressure Sensors</span>
-              <strong>98%</strong>
-            </div>
-
-            <div className="progress">
               <div
                 className="progress-fill blue"
-                style={{ width: "98%" }}
+                style={{
+                  width: `${Math.min(
+                    100,
+                    (sensorData.flowRate / 150) * 100
+                  )}%`,
+                }}
               ></div>
+
             </div>
 
           </div>
 
 
+          {/* PRESSURE */}
+
           <div className="health-item">
 
             <div>
-              <span>ESP32 Connectivity</span>
-              <strong>99%</strong>
+
+              <span>
+                Pressure
+              </span>
+
+              <strong>
+                {sensorData.pressure} Bar
+              </strong>
+
             </div>
 
             <div className="progress">
+
               <div
                 className="progress-fill cyan"
-                style={{ width: "99%" }}
+                style={{
+                  width: `${Math.min(
+                    100,
+                    (sensorData.pressure / 5) * 100
+                  )}%`,
+                }}
               ></div>
+
             </div>
 
           </div>
 
 
+          {/* LEAK PROBABILITY */}
+
           <div className="health-item">
 
             <div>
-              <span>AI Detection Engine</span>
-              <strong>98.4%</strong>
+
+              <span>
+                Leak Probability
+              </span>
+
+              <strong
+                className={
+                  sensorData.leakProbability >= 80
+                    ? "red-value"
+                    : "metric-green"
+                }
+              >
+                {sensorData.leakProbability}%
+              </strong>
+
             </div>
 
             <div className="progress">
+
               <div
-                className="progress-fill purple"
-                style={{ width: "98.4%" }}
+                className={
+                  sensorData.leakProbability >= 80
+                    ? "progress-fill"
+                    : "progress-fill green"
+                }
+                style={{
+                  width: `${sensorData.leakProbability}%`,
+                  background:
+                    sensorData.leakProbability >= 80
+                      ? "#ff4141"
+                      : undefined,
+                }}
               ></div>
+
+            </div>
+
+          </div>
+
+
+          {/* AI CONFIDENCE */}
+
+          <div className="health-item">
+
+            <div>
+
+              <span>
+                AI Confidence
+              </span>
+
+              <strong className="metric-green">
+                {sensorData.aiConfidence}%
+              </strong>
+
+            </div>
+
+            <div className="progress">
+
+              <div
+                className="progress-fill green"
+                style={{
+                  width: `${sensorData.aiConfidence}%`,
+                }}
+              ></div>
+
             </div>
 
           </div>
 
         </div>
 
-      </section>
+
+        {/* SYSTEM HEALTH */}
+
+        <div className="analytics-panel">
+
+          <div className="analytics-panel-header">
+
+            <div>
+
+              <h2>
+                ❤️ System Health
+              </h2>
+
+              <p>
+                Overall network condition
+              </p>
+
+            </div>
+
+            <strong
+              className={
+                leakDetected
+                  ? "red-value"
+                  : "metric-green"
+              }
+            >
+              {systemHealth}%
+            </strong>
+
+          </div>
+
+
+          <div className="health-item">
+
+            <div>
+
+              <span>
+                Pipeline Health
+              </span>
+
+              <strong>
+                {leakDetected
+                  ? "72%"
+                  : "98%"}
+              </strong>
+
+            </div>
+
+            <div className="progress">
+
+              <div
+                className={
+                  leakDetected
+                    ? "progress-fill"
+                    : "progress-fill green"
+                }
+                style={{
+                  width: leakDetected
+                    ? "72%"
+                    : "98%",
+                  background: leakDetected
+                    ? "#ff4141"
+                    : undefined,
+                }}
+              ></div>
+
+            </div>
+
+          </div>
+
+
+          <div className="health-item">
+
+            <div>
+
+              <span>
+                Sensor Connectivity
+              </span>
+
+              <strong className="metric-green">
+                100%
+              </strong>
+
+            </div>
+
+            <div className="progress">
+
+              <div
+                className="progress-fill green"
+                style={{
+                  width: "100%",
+                }}
+              ></div>
+
+            </div>
+
+          </div>
+
+
+          <div className="health-item">
+
+            <div>
+
+              <span>
+                AI Engine
+              </span>
+
+              <strong className="metric-green">
+                98%
+              </strong>
+
+            </div>
+
+            <div className="progress">
+
+              <div
+                className="progress-fill purple"
+                style={{
+                  width: "98%",
+                }}
+              ></div>
+
+            </div>
+
+          </div>
+
+
+          <div className="health-item">
+
+            <div>
+
+              <span>
+                Network Availability
+              </span>
+
+              <strong className="metric-green">
+                99.9%
+              </strong>
+
+            </div>
+
+            <div className="progress">
+
+              <div
+                className="progress-fill cyan"
+                style={{
+                  width: "99.9%",
+                }}
+              ></div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      {/* INCIDENT ANALYTICS */}
+
+      <div className="analytics-grid">
+
+        {/* INCIDENT SUMMARY */}
+
+        <div className="analytics-panel">
+
+          <div className="analytics-panel-header">
+
+            <div>
+
+              <h2>
+                📊 Incident Summary
+              </h2>
+
+              <p>
+                Current detection statistics
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div className="health-item">
+
+            <div>
+
+              <span>
+                Resolved Incidents
+              </span>
+
+              <strong className="metric-green">
+                {resolvedIncidents}
+              </strong>
+
+            </div>
+
+            <div className="progress">
+
+              <div
+                className="progress-fill green"
+                style={{
+                  width:
+                    totalIncidents > 0
+                      ? `${(resolvedIncidents / totalIncidents) * 100}%`
+                      : "0%",
+                }}
+              ></div>
+
+            </div>
+
+          </div>
+
+
+          <div className="health-item">
+
+            <div>
+
+              <span>
+                Active Incidents
+              </span>
+
+              <strong className="red-value">
+                {activeIncidents}
+              </strong>
+
+            </div>
+
+            <div className="progress">
+
+              <div
+                className="progress-fill"
+                style={{
+                  width:
+                    totalIncidents > 0
+                      ? `${(activeIncidents / totalIncidents) * 100}%`
+                      : "0%",
+                  background: "#ff4141",
+                }}
+              ></div>
+
+            </div>
+
+          </div>
+
+
+          <div className="health-item">
+
+            <div>
+
+              <span>
+                High Risk Incidents
+              </span>
+
+              <strong>
+                {highRiskIncidents}
+              </strong>
+
+            </div>
+
+            <div className="progress">
+
+              <div
+                className="progress-fill"
+                style={{
+                  width:
+                    totalIncidents > 0
+                      ? `${(highRiskIncidents / totalIncidents) * 100}%`
+                      : "0%",
+                  background: "#f59e0b",
+                }}
+              ></div>
+
+            </div>
+
+          </div>
+
+
+          <div className="health-item">
+
+            <div>
+
+              <span>
+                Response Performance
+              </span>
+
+              <strong className="metric-green">
+                {responseScore}%
+              </strong>
+
+            </div>
+
+            <div className="progress">
+
+              <div
+                className="progress-fill green"
+                style={{
+                  width: `${responseScore}%`,
+                }}
+              ></div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {/* FREQUENT LOCATIONS */}
+
+        <div className="analytics-panel">
+
+          <div className="analytics-panel-header">
+
+            <div>
+
+              <h2>
+                📍 Incident Locations
+              </h2>
+
+              <p>
+                Areas with recorded incidents
+              </p>
+
+            </div>
+
+          </div>
+
+
+          {locationStats.length > 0 ? (
+
+            locationStats.map(
+              ([location, count], index) => (
+
+                <div
+                  className="health-item"
+                  key={location}
+                >
+
+                  <div>
+
+                    <span>
+                      {index + 1}. {location}
+                    </span>
+
+                    <strong>
+                      {count} incident
+                      {count !== 1 ? "s" : ""}
+                    </strong>
+
+                  </div>
+
+                  <div className="progress">
+
+                    <div
+                      className="progress-fill blue"
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          count * 25
+                        )}%`,
+                      }}
+                    ></div>
+
+                  </div>
+
+                </div>
+
+              )
+            )
+
+          ) : (
+
+            <div className="no-alerts">
+
+              <div>📊</div>
+
+              <h2>
+                No Incident Data
+              </h2>
+
+              <p>
+                Incident analytics will appear here.
+              </p>
+
+            </div>
+
+          )}
+
+        </div>
+
+      </div>
 
 
       {/* RECENT INCIDENTS */}
 
-      <section className="analytics-panel incidents-panel">
+      <div className="analytics-panel">
 
         <div className="analytics-panel-header">
 
           <div>
 
-            <h2>📋 Recent Incidents</h2>
+            <h2>
+              🕒 Recent Incidents
+            </h2>
 
             <p>
-              Latest detected events
+              Latest AquaGuard AI detections
             </p>
 
           </div>
 
-        </div>
-
-
-        <div className="incident-table">
-
-          <div className="incident-row table-header">
-
-            <span>Incident</span>
-            <span>Location</span>
-            <span>Probability</span>
-            <span>Response</span>
-            <span>Status</span>
-
-          </div>
-
-
-          <div className="incident-row">
-
-            <span>Leak #AQ-2045</span>
-            <span>Pipeline Node 3</span>
-            <span>96%</span>
-            <span>4 min</span>
-
-            <span className="status-resolved">
-              Resolved
-            </span>
-
-          </div>
-
-
-          <div className="incident-row">
-
-            <span>Leak #AQ-2044</span>
-            <span>Pipeline Node 7</span>
-            <span>91%</span>
-            <span>6 min</span>
-
-            <span className="status-resolved">
-              Resolved
-            </span>
-
-          </div>
-
-
-          <div className="incident-row">
-
-            <span>Leak #AQ-2043</span>
-            <span>Pipeline Node 2</span>
-            <span>87%</span>
-            <span>5 min</span>
-
-            <span className="status-resolved">
-              Resolved
-            </span>
-
-          </div>
+          <strong className="metric-blue">
+            LIVE
+          </strong>
 
         </div>
 
-      </section>
+
+        {incidents.slice(0, 5).map(
+          (incident) => (
+
+            <div
+              className="sensor-row"
+              key={incident.id}
+            >
+
+              <span>
+                <strong>
+                  {incident.id}
+                </strong>
+                {" — "}
+                {incident.location}
+              </span>
+
+              <strong
+                className={
+                  incident.status === "Active"
+                    ? "red-value"
+                    : "metric-green"
+                }
+              >
+                {incident.status}
+              </strong>
+
+            </div>
+
+          )
+        )}
+
+      </div>
 
     </div>
   );
 }
+
+export default Analytics;

@@ -1,43 +1,30 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { useAquaGuard } from "../context/AquaGuardContext";
 
-const initialAlerts = [
-  {
-    id: "ALT-001",
-    title: "Water Leak Detected",
-    location: "Pipeline Node 3",
-    probability: 96,
-    priority: "HIGH",
-    time: "2 minutes ago",
-    status: "Active",
-    type: "leak",
-  },
-  {
-    id: "ALT-002",
-    title: "Pressure Drop Detected",
-    location: "Pipeline Node 7",
-    probability: 91,
-    priority: "HIGH",
-    time: "18 minutes ago",
-    status: "Resolved",
-    type: "pressure",
-  },
-  {
-    id: "ALT-003",
-    title: "Abnormal Flow Pattern",
-    location: "Pipeline Node 5",
-    probability: 84,
-    priority: "MEDIUM",
-    time: "42 minutes ago",
-    status: "Resolved",
-    type: "flow",
-  },
-];
+function Alerts() {
+  const {
+    incidents,
+    leakDetected,
+    resolveIncident,
+  } = useAquaGuard();
 
-export default function Alerts() {
-  const [alerts, setAlerts] = useState(initialAlerts);
   const [filter, setFilter] = useState("All");
   const [selectedAlert, setSelectedAlert] = useState(null);
 
+  // Convert incidents into alerts
+  const alerts = incidents.map((incident) => ({
+    ...incident,
+    title:
+      incident.probability >= 90
+        ? "Water Leak Detected"
+        : "Abnormal Water Pattern",
+    priority:
+      incident.probability >= 90
+        ? "HIGH"
+        : "MEDIUM",
+  }));
+
+  // Filter alerts
   const filteredAlerts =
     filter === "All"
       ? alerts
@@ -45,24 +32,24 @@ export default function Alerts() {
           (alert) => alert.status === filter
         );
 
-  const resolveAlert = (id) => {
-    setAlerts((currentAlerts) =>
-      currentAlerts.map((alert) =>
-        alert.id === id
-          ? {
-              ...alert,
-              status: "Resolved",
-            }
-          : alert
-      )
-    );
-
-    setSelectedAlert(null);
-  };
-
-  const activeCount = alerts.filter(
+  // Statistics
+  const activeAlerts = alerts.filter(
     (alert) => alert.status === "Active"
   ).length;
+
+  const highPriorityAlerts = alerts.filter(
+    (alert) => alert.priority === "HIGH"
+  ).length;
+
+  const resolvedAlerts = alerts.filter(
+    (alert) => alert.status === "Resolved"
+  ).length;
+
+  // Resolve
+  const handleResolve = (alertId) => {
+    resolveIncident(alertId);
+    setSelectedAlert(null);
+  };
 
   return (
     <div className="alerts-page">
@@ -73,11 +60,13 @@ export default function Alerts() {
 
         <div>
 
-          <div className="page-label">
+          <span className="page-label">
             AQUAGUARD AI / ALERTS
-          </div>
+          </span>
 
-          <h1>Alert Center</h1>
+          <h1>
+            Alert Center
+          </h1>
 
           <p>
             Monitor and manage water network alerts
@@ -85,27 +74,30 @@ export default function Alerts() {
 
         </div>
 
+
         <div className="active-alert-counter">
 
           <span className="alert-counter-dot"></span>
 
-          {activeCount} Active Alerts
+          {activeAlerts} Active Alerts
 
         </div>
 
       </div>
 
 
-      {/* SUMMARY */}
+      {/* STATISTICS */}
 
-      <section className="alert-stats">
+      <div className="alert-stats">
 
         <div className="alert-stat-card">
 
-          <span>🚨 Active Alerts</span>
+          <span>
+            🚨 Active Alerts
+          </span>
 
           <strong className="red-value">
-            {activeCount}
+            {activeAlerts}
           </strong>
 
           <small>
@@ -117,15 +109,12 @@ export default function Alerts() {
 
         <div className="alert-stat-card">
 
-          <span>⚠ High Priority</span>
+          <span>
+            ⚠ High Priority
+          </span>
 
-          <strong>
-            {
-              alerts.filter(
-                (alert) =>
-                  alert.priority === "HIGH"
-              ).length
-            }
+          <strong className="red-value">
+            {highPriorityAlerts}
           </strong>
 
           <small>
@@ -137,15 +126,12 @@ export default function Alerts() {
 
         <div className="alert-stat-card">
 
-          <span>✓ Resolved Today</span>
+          <span>
+            ✓ Resolved Today
+          </span>
 
           <strong className="green-text">
-            {
-              alerts.filter(
-                (alert) =>
-                  alert.status === "Resolved"
-              ).length
-            }
+            {resolvedAlerts}
           </strong>
 
           <small>
@@ -157,7 +143,9 @@ export default function Alerts() {
 
         <div className="alert-stat-card">
 
-          <span>🤖 AI Confidence</span>
+          <span>
+            🤖 AI Confidence
+          </span>
 
           <strong>
             98%
@@ -169,7 +157,7 @@ export default function Alerts() {
 
         </div>
 
-      </section>
+      </div>
 
 
       {/* FILTER */}
@@ -177,6 +165,7 @@ export default function Alerts() {
       <div className="alerts-filter">
 
         <button
+          type="button"
           className={
             filter === "All"
               ? "alert-filter active"
@@ -187,7 +176,9 @@ export default function Alerts() {
           All Alerts
         </button>
 
+
         <button
+          type="button"
           className={
             filter === "Active"
               ? "alert-filter active"
@@ -198,7 +189,9 @@ export default function Alerts() {
           Active
         </button>
 
+
         <button
+          type="button"
           className={
             filter === "Resolved"
               ? "alert-filter active"
@@ -214,7 +207,7 @@ export default function Alerts() {
 
       {/* ALERT LIST */}
 
-      <section className="alerts-list">
+      <div className="alerts-list">
 
         {filteredAlerts.map((alert) => (
 
@@ -227,16 +220,18 @@ export default function Alerts() {
             key={alert.id}
           >
 
+            {/* ICON */}
+
             <div className="alert-card-icon">
 
-              {alert.type === "leak"
-                ? "💧"
-                : alert.type === "pressure"
-                ? "🔵"
-                : "📈"}
+              {alert.status === "Active"
+                ? "🚨"
+                : "✓"}
 
             </div>
 
+
+            {/* CONTENT */}
 
             <div className="alert-card-content">
 
@@ -254,6 +249,7 @@ export default function Alerts() {
 
                 </div>
 
+
                 <span
                   className={
                     alert.status === "Active"
@@ -266,6 +262,8 @@ export default function Alerts() {
 
               </div>
 
+
+              {/* INFO */}
 
               <div className="alert-card-info">
 
@@ -294,9 +292,12 @@ export default function Alerts() {
               </div>
 
 
+              {/* ACTIONS */}
+
               <div className="alert-card-actions">
 
                 <button
+                  type="button"
                   className="view-alert-btn"
                   onClick={() =>
                     setSelectedAlert(alert)
@@ -309,9 +310,10 @@ export default function Alerts() {
                 {alert.status === "Active" && (
 
                   <button
+                    type="button"
                     className="resolve-alert-btn"
                     onClick={() =>
-                      resolveAlert(alert.id)
+                      handleResolve(alert.id)
                     }
                   >
                     ✓ Resolve Alert
@@ -327,10 +329,10 @@ export default function Alerts() {
 
         ))}
 
-      </section>
+      </div>
 
 
-      {/* EMPTY */}
+      {/* EMPTY STATE */}
 
       {filteredAlerts.length === 0 && (
 
@@ -339,11 +341,12 @@ export default function Alerts() {
           <div>✓</div>
 
           <h2>
-            No alerts found
+            No Active Alerts
           </h2>
 
           <p>
-            There are no alerts matching this filter.
+            The AquaGuard AI system has no alerts
+            requiring attention.
           </p>
 
         </div>
@@ -351,21 +354,33 @@ export default function Alerts() {
       )}
 
 
-      {/* MODAL */}
+      {/* DETAILS MODAL */}
 
       {selectedAlert && (
 
-        <div className="report-overlay">
+        <div
+          className="report-overlay"
+          onClick={() =>
+            setSelectedAlert(null)
+          }
+        >
 
-          <div className="report-modal">
+          <div
+            className="report-modal"
+            onClick={(e) =>
+              e.stopPropagation()
+            }
+          >
+
+            {/* MODAL HEADER */}
 
             <div className="modal-header">
 
               <div>
 
-                <div className="modal-label">
+                <span className="modal-label">
                   ALERT DETAILS
-                </div>
+                </span>
 
                 <h2>
                   {selectedAlert.title}
@@ -377,7 +392,9 @@ export default function Alerts() {
 
               </div>
 
+
               <button
+                type="button"
                 className="close-modal"
                 onClick={() =>
                   setSelectedAlert(null)
@@ -389,6 +406,8 @@ export default function Alerts() {
             </div>
 
 
+            {/* STATUS */}
+
             <div className="incident-status-box">
 
               <div>
@@ -399,7 +418,8 @@ export default function Alerts() {
 
                 <strong
                   className={
-                    selectedAlert.status === "Active"
+                    selectedAlert.status ===
+                    "Active"
                       ? "red-value"
                       : "green-text"
                   }
@@ -424,6 +444,8 @@ export default function Alerts() {
 
             </div>
 
+
+            {/* DETAILS */}
 
             <div className="report-details">
 
@@ -507,18 +529,136 @@ export default function Alerts() {
             </div>
 
 
+            {/* RESPONSE */}
+
+            <div className="report-timeline">
+
+              <h3>
+                Alert Response
+              </h3>
+
+
+              <div className="timeline-item">
+
+                <span>
+                  ✓
+                </span>
+
+                <div>
+
+                  <strong>
+                    Sensor anomaly detected
+                  </strong>
+
+                  <small>
+                    Abnormal flow and pressure
+                    pattern identified.
+                  </small>
+
+                </div>
+
+              </div>
+
+
+              <div className="timeline-item">
+
+                <span>
+                  ✓
+                </span>
+
+                <div>
+
+                  <strong>
+                    AI analysis completed
+                  </strong>
+
+                  <small>
+                    Detection confidence: 98%.
+                  </small>
+
+                </div>
+
+              </div>
+
+
+              <div className="timeline-item">
+
+                <span>
+                  ✓
+                </span>
+
+                <div>
+
+                  <strong>
+                    Location identified
+                  </strong>
+
+                  <small>
+                    {selectedAlert.location}
+                  </small>
+
+                </div>
+
+              </div>
+
+
+              {selectedAlert.status ===
+                "Resolved" && (
+
+                <div className="timeline-item">
+
+                  <span>
+                    ✓
+                  </span>
+
+                  <div>
+
+                    <strong>
+                      Alert resolved
+                    </strong>
+
+                    <small>
+                      Incident successfully handled.
+                    </small>
+
+                  </div>
+
+                </div>
+
+              )}
+
+            </div>
+
+
+            {/* RESOLVE */}
+
             {selectedAlert.status === "Active" && (
 
               <button
+                type="button"
                 className="resolve-alert-btn modal-resolve"
                 onClick={() =>
-                  resolveAlert(selectedAlert.id)
+                  handleResolve(
+                    selectedAlert.id
+                  )
                 }
               >
                 ✓ Resolve Alert
               </button>
 
             )}
+
+
+            <button
+              type="button"
+              className="close-report-btn"
+              onClick={() =>
+                setSelectedAlert(null)
+              }
+            >
+              Close
+
+            </button>
 
           </div>
 
@@ -529,3 +669,5 @@ export default function Alerts() {
     </div>
   );
 }
+
+export default Alerts;
