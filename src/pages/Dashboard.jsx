@@ -5,14 +5,26 @@ import SensorCharts from "../components/SensorCharts";
 export default function Dashboard() {
   const [leakDetected, setLeakDetected] = useState(false);
   const [ticketCreated, setTicketCreated] = useState(false);
+  const [valveClosed, setValveClosed] = useState(false);
 
-  const createMaintenanceTicket = () => {
-    setTicketCreated(true);
+  const simulateLeak = () => {
+    setLeakDetected(true);
+    setTicketCreated(false);
+    setValveClosed(false);
   };
 
   const resetSystem = () => {
     setLeakDetected(false);
     setTicketCreated(false);
+    setValveClosed(false);
+  };
+
+  const createMaintenanceTicket = () => {
+    setTicketCreated(true);
+  };
+
+  const closeValve = () => {
+    setValveClosed(true);
   };
 
   return (
@@ -38,7 +50,6 @@ export default function Dashboard() {
         </button>
       </aside>
 
-
       {/* MAIN */}
       <main className="main-content">
 
@@ -55,31 +66,22 @@ export default function Dashboard() {
           </div>
         </header>
 
-
         {/* SIMULATION */}
         <div className="simulation-bar">
           <div>
             <strong>Simulation Control</strong>
-            <p>Test the AI leak detection system</p>
+            <p>Test the complete AquaGuard AI response workflow</p>
           </div>
 
           <button
             className="simulate-btn"
-            onClick={
-              leakDetected
-                ? resetSystem
-                : () => {
-                    setLeakDetected(true);
-                    setTicketCreated(false);
-                  }
-            }
+            onClick={leakDetected ? resetSystem : simulateLeak}
           >
             {leakDetected ? "Reset System" : "🚨 Simulate Leak"}
           </button>
         </div>
 
-
-        {/* STAT CARDS */}
+        {/* STATUS CARDS */}
         <section className="stats-grid">
 
           <div className="stat-card">
@@ -107,15 +109,14 @@ export default function Dashboard() {
           </div>
 
           <div className="stat-card">
-            <span>🌊 Water Saved</span>
-            <h2>{leakDetected ? "70 L" : "220 L"}</h2>
-            <small>
-              {leakDetected ? "Loss Detected" : "Today"}
+            <span>🔧 Valve Status</span>
+            <h2>{valveClosed ? "CLOSED" : "OPEN"}</h2>
+            <small className={valveClosed ? "" : "danger-text"}>
+              {valveClosed ? "Section Isolated" : "Water Flow Active"}
             </small>
           </div>
 
         </section>
-
 
         {/* PIPELINE + AI */}
         <section className="dashboard-grid">
@@ -152,7 +153,7 @@ export default function Dashboard() {
 
               <div
                 className={
-                  leakDetected
+                  leakDetected && !valveClosed
                     ? "pipe leak-pipe"
                     : "pipe"
                 }
@@ -160,7 +161,7 @@ export default function Dashboard() {
 
               <div
                 className={
-                  leakDetected
+                  leakDetected && !valveClosed
                     ? "node leak"
                     : "node healthy"
                 }
@@ -170,7 +171,7 @@ export default function Dashboard() {
 
               <div
                 className={
-                  leakDetected
+                  leakDetected && !valveClosed
                     ? "pipe leak-pipe"
                     : "pipe"
                 }
@@ -183,30 +184,44 @@ export default function Dashboard() {
 
             </div>
 
-            {leakDetected && (
+            {leakDetected && !valveClosed && (
               <div className="leak-location">
                 📍 Leak detected near Pipeline Node 3
               </div>
             )}
-          </div>
 
+            {valveClosed && (
+              <div className="isolation-message">
+                ✓ Node 3 isolated — water flow stopped
+              </div>
+            )}
+          </div>
 
           {/* AI ANALYSIS */}
           <div className="panel ai-panel">
-
             <h2>🤖 AI Analysis</h2>
 
             <div className="ai-status">
               <span>System Status</span>
 
-              <strong className={leakDetected ? "critical" : ""}>
-                {leakDetected ? "CRITICAL" : "HEALTHY"}
+              <strong
+                className={
+                  leakDetected && !valveClosed ? "critical" : ""
+                }
+              >
+                {!leakDetected
+                  ? "HEALTHY"
+                  : valveClosed
+                  ? "ISOLATED"
+                  : "CRITICAL"}
               </strong>
             </div>
 
             <div className="ai-value">
               <span>Leak Probability</span>
-              <strong>{leakDetected ? "96%" : "4%"}</strong>
+              <strong>
+                {leakDetected && !valveClosed ? "96%" : "4%"}
+              </strong>
             </div>
 
             <div className="ai-value">
@@ -215,35 +230,45 @@ export default function Dashboard() {
             </div>
 
             <div className="ai-value">
-              <span>Detected Cause</span>
+              <span>Detected Location</span>
               <strong>
-                {leakDetected ? "Pipeline Crack" : "None"}
+                {leakDetected ? "Node 3" : "None"}
+              </strong>
+            </div>
+
+            <div className="ai-value">
+              <span>Recommended Action</span>
+              <strong>
+                {valveClosed
+                  ? "Repair Pipeline"
+                  : leakDetected
+                  ? "Isolate Node 3"
+                  : "Continue Monitoring"}
               </strong>
             </div>
 
             <div
               className={
-                leakDetected
+                leakDetected && !valveClosed
                   ? "recommendation danger"
                   : "recommendation"
               }
             >
-              {leakDetected
-                ? "⚠ Inspect Pipeline Node 3 immediately"
-                : "✓ No abnormal activity detected"}
+              {!leakDetected
+                ? "✓ No abnormal activity detected"
+                : valveClosed
+                ? "✓ Pipeline section safely isolated"
+                : "⚠ Immediate isolation recommended"}
             </div>
-
           </div>
 
         </section>
-
 
         {/* ALERTS + SENSOR */}
         <section className="dashboard-grid">
 
           {/* ALERTS */}
           <div className="panel">
-
             <h2>📡 Live Alerts</h2>
 
             {!leakDetected ? (
@@ -266,10 +291,6 @@ export default function Dashboard() {
                   📍 Location: Pipeline Node 3
                 </div>
 
-                <div className="alert warning">
-                  ⚠ Administrator Alert Generated
-                </div>
-
                 {!ticketCreated ? (
                   <button
                     className="maintenance-btn"
@@ -290,15 +311,29 @@ export default function Dashboard() {
                     </div>
                   </div>
                 )}
+
+                {ticketCreated && !valveClosed && (
+                  <button
+                    className="valve-btn"
+                    onClick={closeValve}
+                  >
+                    🔒 Close Isolation Valve
+                  </button>
+                )}
+
+                {valveClosed && (
+                  <div className="ticket-success">
+                    ✓ Isolation Valve Closed
+                    <br />
+                    <small>Pipeline Node 3 isolated successfully.</small>
+                  </div>
+                )}
               </>
             )}
-
           </div>
-
 
           {/* SENSOR STATUS */}
           <div className="panel">
-
             <h2>🎛 Sensor Status</h2>
 
             <div className="sensor-row">
@@ -321,12 +356,17 @@ export default function Dashboard() {
               <strong>🟢 Active</strong>
             </div>
 
+            <div className="sensor-row">
+              <span>Isolation Valve</span>
+              <strong>
+                {valveClosed ? "🔴 Closed" : "🟢 Open"}
+              </strong>
+            </div>
           </div>
 
         </section>
 
-
-        {/* MAINTENANCE STATUS */}
+        {/* MAINTENANCE RESPONSE */}
         {ticketCreated && (
           <section className="panel maintenance-panel">
 
@@ -336,8 +376,16 @@ export default function Dashboard() {
                 <p>Incident response workflow</p>
               </div>
 
-              <span className="status-badge">
-                TEAM DISPATCHED
+              <span
+                className={
+                  valveClosed
+                    ? "status-badge success-badge"
+                    : "status-badge"
+                }
+              >
+                {valveClosed
+                  ? "PIPELINE ISOLATED"
+                  : "TEAM DISPATCHED"}
               </span>
             </div>
 
@@ -367,19 +415,32 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="maintenance-step active">
-                <span>→</span>
+              <div
+                className={
+                  valveClosed
+                    ? "maintenance-step completed"
+                    : "maintenance-step active"
+                }
+              >
+                <span>{valveClosed ? "✓" : "→"}</span>
                 <div>
-                  <strong>Maintenance Team Dispatched</strong>
-                  <small>ETA: 12 minutes</small>
+                  <strong>
+                    {valveClosed
+                      ? "Pipeline Isolated"
+                      : "Maintenance Team Dispatched"}
+                  </strong>
+
+                  <small>
+                    {valveClosed
+                      ? "Node 3 safely isolated"
+                      : "ETA: 12 minutes"}
+                  </small>
                 </div>
               </div>
 
             </div>
-
           </section>
         )}
-
 
         {/* CHARTS */}
         <SensorCharts leakDetected={leakDetected} />
